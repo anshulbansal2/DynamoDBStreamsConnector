@@ -12,8 +12,6 @@ import com.goibibo.dp.DynamoDBStreams.util.KafkaUtil
 import org.apache.kafka.clients.producer.KafkaProducer
 import org.apache.log4j.{BasicConfigurator, Logger}
 
-//remove if not needed
-
 object Main {
   BasicConfigurator.configure()
   private val logger: Logger = Logger.getLogger(Main.getClass)

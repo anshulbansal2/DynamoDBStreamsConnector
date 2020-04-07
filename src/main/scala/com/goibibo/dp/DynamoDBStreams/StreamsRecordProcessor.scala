@@ -9,11 +9,8 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.ShutdownReason
 import com.amazonaws.services.kinesis.clientlibrary.types.{InitializationInput, ProcessRecordsInput, ShutdownInput}
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import com.amazonaws.services.dynamodbv2.document.ItemUtils
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
-
-//remove if not needed
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
+
 
 class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB,
                              private val topicName: String, producer: KafkaProducer[String, String])
@@ -36,12 +33,12 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB,
         val streamRecord: com.amazonaws.services.dynamodbv2.model.Record =
           record.asInstanceOf[RecordAdapter].getInternalObject
         streamRecord.getEventName match {
+
           case "INSERT" | "MODIFY" =>
             val key = streamRecord.getDynamodb.getKeys
             val keyStr = ItemUtils.toItem(key).toJSON
             val value = streamRecord.getDynamodb.getNewImage
             val valueStr = ItemUtils.toItem(value).toJSON
-            println(s"Produce key $keyStr and value $valueStr in Kafka topic ")
             val record = new ProducerRecord(topicName,
               keyStr,
               valueStr)
@@ -51,8 +48,6 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB,
             val key = streamRecord.getDynamodb.getKeys
             val keyStr = ItemUtils.toItem(key).toJSON
             val valueStr: String = "Deleted"
-            println(s"Produce key $key and value $valueStr in Kafka topic ")
-            println(s"Produce key $keyStr and value $valueStr in Kafka topic ")
             val record = new ProducerRecord(topicName,
               keyStr,
               valueStr)
