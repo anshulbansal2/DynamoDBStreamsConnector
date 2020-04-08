@@ -62,7 +62,7 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
             val record = new ProducerRecord(topicName,
               keyStr,
               valueStr)
-            producer.send(record)
+            producer.send(record).get()
 
         }
       }
