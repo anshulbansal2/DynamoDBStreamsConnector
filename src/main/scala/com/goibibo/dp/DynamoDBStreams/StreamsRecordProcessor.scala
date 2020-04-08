@@ -1,8 +1,5 @@
 package com.goibibo.dp.DynamoDBStreams
 
-import java.nio.charset.Charset
-import java.util
-
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.streamsadapter.model.RecordAdapter
 import com.amazonaws.services.kinesis.clientlibrary.interfaces.v2.IRecordProcessor
@@ -11,7 +8,7 @@ import com.amazonaws.services.kinesis.clientlibrary.types.{InitializationInput, 
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 import com.amazonaws.services.dynamodbv2.document._
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, KeyType, TableDescription}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -25,6 +22,14 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
 
   private val dynamoDBClient: AmazonDynamoDB = dynamoDBClient2
   implicit val table: Table = new DynamoDB(dynamoDBClient).getTable(tableName)
+
+  private val description : TableDescription= table.describe()
+
+  private val hashKey: String = description.getKeySchema.asScala.filter(x=> x.getKeyType.equals(KeyType.HASH.toString)).head.getAttributeName
+  println(s"HashKey for table : $tableName is $hashKey")
+
+  private val sortKey: String = description.getKeySchema.asScala.filter(x=> x.getKeyType.equals(KeyType.RANGE.toString)).head.getAttributeName
+  println(s"SortKey for table : $tableName is : $sortKey ")
 
   override def initialize(initializationInput: InitializationInput): Unit = {
     checkpointCounter = 0
@@ -73,14 +78,12 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
   }
 
   def getItem(keys: java.util.Map[String, AttributeValue])(implicit table:Table) : Item = {
-    val (hashKey, hasValue): (String, AttributeValue) = keys.asScala.head
-    val (sortKey, sortValue): (String, AttributeValue) = keys.asScala.tail.head
-    val spec : GetItemSpec = new GetItemSpec().withPrimaryKey(hashKey, hasValue, sortKey, sortValue)
-    val dynamoItem : Item = table.getItem(spec)
-    dynamoItem
-  }
-
-
+      val hashValue: String = keys.asScala(hashKey).getS
+      val sortValue: String = keys.asScala(sortKey).getS
+      val spec : GetItemSpec = new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey, sortValue)
+      val dynamoItem : Item = table.getItem(spec)
+      dynamoItem
+    }
 
   override def shutdown(shutdownInput: ShutdownInput): Unit = {
     if (shutdownInput.getShutdownReason == ShutdownReason.TERMINATE) {

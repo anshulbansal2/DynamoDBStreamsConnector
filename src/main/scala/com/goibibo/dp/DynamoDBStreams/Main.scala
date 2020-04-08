@@ -10,10 +10,10 @@ import com.amazonaws.services.kinesis.clientlibrary.lib.worker.{InitialPositionI
 import com.goibibo.dp.DynamoDBStreams.models.KafkaProperties
 import com.goibibo.dp.DynamoDBStreams.util.KafkaUtil
 import org.apache.kafka.clients.producer.KafkaProducer
-import org.apache.log4j.{BasicConfigurator, Logger}
+import org.apache.log4j.Logger
 
 object Main {
-  BasicConfigurator.configure()
+//  BasicConfigurator.configure()
   private val logger: Logger = Logger.getLogger(Main.getClass)
 
   private var worker: Worker = _
@@ -53,6 +53,8 @@ object Main {
       adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient)
       val kafkaTopicName = DynamoDBStreamsSettings.writeTopic
       recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, tableName, kafkaTopicName, producer)
+
+      //streams-adapter-tableName will be created in dynamodb as a leases table to track worker state and dynamodb table
 
       workerConfig = new KinesisClientLibConfiguration(s"streams-adapter-$tableName",
         streamArn,
