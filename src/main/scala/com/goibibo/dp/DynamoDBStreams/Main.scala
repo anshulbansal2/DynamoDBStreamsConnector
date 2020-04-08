@@ -52,7 +52,7 @@ object Main {
       dynamoDBStreamsClient = AmazonDynamoDBStreamsClientBuilder.standard.withRegion(awsRegion).build
       adapterClient = new AmazonDynamoDBStreamsAdapterClient(dynamoDBStreamsClient)
       val kafkaTopicName = DynamoDBStreamsSettings.writeTopic
-      recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, kafkaTopicName, producer)
+      recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, tableName, kafkaTopicName, producer)
 
       workerConfig = new KinesisClientLibConfiguration(s"streams-adapter-$tableName",
         streamArn,
