@@ -64,6 +64,7 @@ object Main {
         .withMaxRecords(1000)
         .withIdleTimeBetweenReadsInMillis(500)
         .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON)
+        .withCallProcessRecordsEvenForEmptyRecordList(true)
 
       logger.info("Creating worker for stream: " + streamArn)
       worker = StreamsWorkerFactory.createDynamoDbStreamsWorker(
