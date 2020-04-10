@@ -53,7 +53,7 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
             val record = new ProducerRecord(topicName,
               keyStr,
               valueStr)
-            producer.send(record)
+            producer.send(record).get()
 
           case "REMOVE" =>
             val key = streamRecord.getDynamodb.getKeys
@@ -63,11 +63,11 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
               keyStr,
               valueStr)
             producer.send(record).get()
-
         }
       }
       checkpointCounter += 1
       if (checkpointCounter % 10 == 0) {
+        producer.flush()
         try processRecordsInput.getCheckpointer.checkpoint()
         catch {
           case e: Exception => e.printStackTrace()
