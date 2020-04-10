@@ -58,7 +58,7 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
               valueStr)
 
             producer.send(record).get()
-            logger.info(s"Successfully produced record")
+            logger.info(s"Successfully produced record: $keyStr")
 
           case "REMOVE" =>
             val key = streamRecord.getDynamodb.getKeys
@@ -69,7 +69,7 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
               keyStr,
               valueStr)
             producer.send(record).get()
-            logger.info(s"Deleted record produced successfully")
+            logger.info(s"Deleted record produced successfully: $keyStr")
         }
       }
       checkpointCounter += 1
