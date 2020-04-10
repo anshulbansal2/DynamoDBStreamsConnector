@@ -14,7 +14,7 @@ import org.apache.log4j.Logger
 
 object Main {
 
-  private val logger: Logger = Logger.getLogger(Main.getClass)
+  val logger: Logger = Logger.getLogger(Main.getClass)
 
   private var worker: Worker = _
   private var workerConfig: KinesisClientLibConfiguration = _
@@ -55,7 +55,7 @@ object Main {
 
       recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, tableName, kafkaTopicName, producer)
 
-      //streams-adapter-tableName will be created in dynamodb as a leases table to track worker state and dynamodb table
+      //streams-adapter-tableName will be created in dynamodb as leases table to track worker state and dynamodb table
 
       workerConfig = new KinesisClientLibConfiguration(s"streams-adapter-$tableName",
         streamArn,
@@ -81,11 +81,11 @@ object Main {
         logger.error("Error in processing records")
         logger.error(e.getMessage + "\n" + e.getStackTrace.mkString("\n\t"))
     } finally {
-      logger.info("Consumer is closed!!!")
+      logger.error(s"Error, calling worker shutdown")
       producer.flush()
       producer.close()
       worker.shutdown()
-      throw new Exception("Consumer is closed!!!")
+      throw new Exception("worker shutdown!!!")
     }
   }
 }
