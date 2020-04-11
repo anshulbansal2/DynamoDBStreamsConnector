@@ -102,15 +102,16 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
     }
 
   override def shutdown(shutdownInput: ShutdownInput): Unit = {
-    if (shutdownInput.getShutdownReason == ShutdownReason.TERMINATE) {
-      logger.info(s"Shutdown called, doing Checkpointing before shutdown")
-      try shutdownInput.getCheckpointer.checkpoint()
-      catch {
-        case e: Exception =>
-          logger.error(s"Exception occured before shutdown")
-          e.printStackTrace()
-      }
-    }
+//    if (shutdownInput.getShutdownReason == ShutdownReason.TERMINATE) {
+//      logger.info(s"Shutdown called, doing Checkpointing before shutdown")
+//      try shutdownInput.getCheckpointer.checkpoint()
+//      catch {
+//        case e: Exception =>
+//          logger.error(s"Exception occured before shutdown")
+//          e.printStackTrace()
+//      }
+//    }
+    logger.info("shutdown called")
   }
 
 }

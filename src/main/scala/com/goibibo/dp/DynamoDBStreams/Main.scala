@@ -86,7 +86,6 @@ object Main {
         producer.close()
     } finally {
       logger.error(s"Error, calling worker shutdown")
-      worker.shutdown()
       System.exit(1)
     }
   }
