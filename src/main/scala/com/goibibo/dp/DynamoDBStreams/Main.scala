@@ -57,10 +57,10 @@ object Main {
 
       //streams-adapter-tableName will be created in dynamodb as leases table to track worker state and dynamodb table
 
-      workerConfig = new KinesisClientLibConfiguration(s"streams-adapter-$tableName",
+      workerConfig = new KinesisClientLibConfiguration(s"kcl-adapter-$tableName",
         streamArn,
         awsCredentialsProvider,
-        s"streams-worker-$tableName")
+        s"streams-worker-prod-$tableName")
         .withMaxRecords(1000)
         .withIdleTimeBetweenReadsInMillis(500)
         .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON)
@@ -80,12 +80,12 @@ object Main {
       case e: Exception =>
         logger.error("Error in processing records")
         logger.error(e.getMessage + "\n" + e.getStackTrace.mkString("\n\t"))
+        producer.flush()
+        producer.close()
     } finally {
       logger.error(s"Error, calling worker shutdown")
-      producer.flush()
-      producer.close()
       worker.shutdown()
-      throw new Exception("worker shutdown!!!")
+      System.exit(1)
     }
   }
 }

@@ -36,52 +36,60 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
   }
 
   override def processRecords(processRecordsInput: ProcessRecordsInput): Unit = {
-    for (record <- processRecordsInput.getRecords) {
-      val data: String = new String(record.getData.array(), Charset.forName("UTF-8"))
+    try {
+      for (record <- processRecordsInput.getRecords) {
+        val data: String = new String(record.getData.array(), Charset.forName("UTF-8"))
 
-      logger.info(s"DyamoDB Streams Data: $data")
+        logger.info(s"DyamoDB Streams Data: $data")
 
-      if (record.isInstanceOf[RecordAdapter]) {
-        val streamRecord: com.amazonaws.services.dynamodbv2.model.Record =
-          record.asInstanceOf[RecordAdapter].getInternalObject
-        streamRecord.getEventName match {
+        if (record.isInstanceOf[RecordAdapter]) {
+          val streamRecord: com.amazonaws.services.dynamodbv2.model.Record =
+            record.asInstanceOf[RecordAdapter].getInternalObject
+          streamRecord.getEventName match {
 
-          case "INSERT" | "MODIFY" =>
-            val key: java.util.Map[String, AttributeValue] = streamRecord.getDynamodb.getKeys
+            case "INSERT" | "MODIFY" =>
+              val key: java.util.Map[String, AttributeValue] = streamRecord.getDynamodb.getKeys
 
-            val keyStr: String = ItemUtils.toItem(key).toJSON
-            logger.info(s"Producing key : $keyStr in kafka")
+              val keyStr: String = ItemUtils.toItem(key).toJSON
+              logger.info(s"Producing key : $keyStr in kafka")
 
-            val valueStr: String = getItem(key).toJSON
-            val record = new ProducerRecord(topicName,
-              keyStr,
-              valueStr)
+              val valueStr: String = getItem(key).toJSON
+              val record = new ProducerRecord(topicName,
+                keyStr,
+                valueStr)
 
-            producer.send(record).get()
-            logger.info(s"Successfully produced record: $keyStr")
+              producer.send(record).get()
+              logger.info(s"Successfully produced record: $keyStr")
 
-          case "REMOVE" =>
-            val key = streamRecord.getDynamodb.getKeys
-            val keyStr = ItemUtils.toItem(key).toJSON
-            logger.info(s"Deleted record found with key $keyStr")
-            val valueStr: String = "Deleted"
-            val record = new ProducerRecord(topicName,
-              keyStr,
-              valueStr)
-            producer.send(record).get()
-            logger.info(s"Deleted record produced successfully: $keyStr")
+            case "REMOVE" =>
+              val key = streamRecord.getDynamodb.getKeys
+              val keyStr = ItemUtils.toItem(key).toJSON
+              logger.info(s"Deleted record found with key $keyStr")
+              val valueStr: String = "Deleted"
+              val record = new ProducerRecord(topicName,
+                keyStr,
+                valueStr)
+              producer.send(record).get()
+              logger.info(s"Deleted record produced successfully: $keyStr")
+          }
+        }
+        checkpointCounter += 1
+        if (checkpointCounter % 10 == 0) {
+          logger.info(s"Checkingpointing current progress.. ")
+          try processRecordsInput.getCheckpointer.checkpoint()
+          catch {
+            case e: Exception =>
+              logger.error(s"Exception occured during checkpointing: $e")
+              e.printStackTrace()
+          }
         }
       }
-      checkpointCounter += 1
-      if (checkpointCounter % 10 == 0) {
-        logger.info(s"Checkingpointing current progress.. ")
-        try processRecordsInput.getCheckpointer.checkpoint()
-        catch {
-          case e: Exception =>
-            logger.error(s"Exception occured during checkpointing: $e")
-            e.printStackTrace()
-        }
-      }
+    } catch {
+      case e: Exception =>
+        logger.error(s"Exception occured in processing records: ${processRecordsInput.getRecords}")
+        logger.error(e.getMessage + "\n" + e.getStackTrace.mkString("\n\t"))
+        logger.info(s"Performing system exit with error")
+        System.exit(1)
     }
   }
 
