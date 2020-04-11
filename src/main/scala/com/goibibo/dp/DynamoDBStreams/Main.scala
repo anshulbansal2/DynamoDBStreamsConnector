@@ -56,11 +56,13 @@ object Main {
       recordProcessorFactory = new StreamsRecordProcessorFactory(dynamoDBClient, tableName, kafkaTopicName, producer)
 
       //streams-adapter-tableName will be created in dynamodb as leases table to track worker state and dynamodb table
+      val applicationName: String = DynamoDBStreamsSettings.applicationName
+      val workerID: String = DynamoDBStreamsSettings.workerID
 
-      workerConfig = new KinesisClientLibConfiguration(s"kcl-adapter-$tableName",
+      workerConfig = new KinesisClientLibConfiguration(s"$applicationName-$tableName",
         streamArn,
         awsCredentialsProvider,
-        s"streams-worker-prod-$tableName")
+        s"$workerID-$tableName")
         .withMaxRecords(1000)
         .withIdleTimeBetweenReadsInMillis(500)
         .withInitialPositionInStream(InitialPositionInStream.TRIM_HORIZON)
