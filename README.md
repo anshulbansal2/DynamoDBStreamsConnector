@@ -5,28 +5,28 @@ Supervisor Kafka Setup:
 ```bash
 
 [program:kafka]
-command=bash -c "JMX_PORT=17264 KAFKA_HEAP_OPTS='-Xms1024M -Xmx3072M' /home/anshul.bansal/kafka_2.12-2.4.1/bin/kafka-server-start.sh /home/anshul.bansal/kafka_2.12-2.4.1/config/server.properties"
+command=bash -c "JMX_PORT=17264 KAFKA_HEAP_OPTS='-Xms1024M -Xmx3072M' /home/ssm-user/kafka/kafka_2.11-2.2.1/bin/kafka-server-start.sh /home/ssm-user/kafka/kafka_2.11-2.2.1/config/server.properties"
 directory=/home/anshul.bansal
 user=root
 autostart=true
 autorestart=true
-stdout_logfile=/home/anshul.bansal/log/kafka/stdout.log
-stderr_logfile=/home/anshul.bansal/log/kafka/stderr.log
-environment = JAVA_HOME=/usr/java/jdk1.8.0_92
+stdout_logfile=/home/ssm-user/logs/kafka/stdout.log
+stderr_logfile=/home/ssm-user/logs/kafka/stderr.log
+environment = JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.amzn2.0.1.x86_64
 ```
 
 
 Zookeeper Setup:
 ```bash
 [program:zookeeper]
-command=bash -c "/home/anshul.bansal/kafka_2.12-2.4.1/bin/zookeeper-server-start.sh /home/anshul.bansal/kafka_2.12-2.4.1/config/zookeeper.properties"
+command=bash -c "/home/ssm-user/kafka/kafka_2.11-2.2.1/bin/zookeeper-server-start.sh /home/ssm-user/kafka/kafka_2.11-2.2.1/config/zookeeper.properties"
 directory=/home/anshul.bansal
 user=root
 autostart=true
 autorestart=true
-stdout_logfile=/home/anshul.bansal/log/zookeeper/stdout.log
-stderr_logfile=/home/anshul.bansal/log/zookeeper/stderr.log
-environment = JAVA_HOME=/usr/java/jdk1.8.0_92
+stdout_logfile=/home/ssm-user/logs/zookeeper/stdout.log
+stderr_logfile=/home/ssm-user/logs/zookeeper/stderr.log
+environment = JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.amzn2.0.1.x86_64
 ```
 
 DynamoDBstreams run command: 

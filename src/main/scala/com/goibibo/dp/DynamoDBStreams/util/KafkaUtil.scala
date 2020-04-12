@@ -60,12 +60,11 @@ object KafkaUtil {
         val props = new Properties
         props.put("bootstrap.servers", kafkaProperties.bootstrapServers)
         props.put("client.id", InetAddress.getLocalHost.getHostName)
-        props.put("acks", "all")
+        props.put("acks", "2")
         props.put("key.serializer",kafkaProperties.keySerializer.getOrElse(classOf[StringSerializer].getName))
         props.put("value.serializer", kafkaProperties.valueSerializer.getOrElse(classOf[StringSerializer].getName))
         props.put("compression.type", kafkaProperties.compressionType.get)
-        props.put("batch.size",kafkaProperties.batchSize.get)
-        props.put("linger.ms",kafkaProperties.lingerMS.get)
+        props.put("request.timeout.ms", "100000")
         props
     }
 }
