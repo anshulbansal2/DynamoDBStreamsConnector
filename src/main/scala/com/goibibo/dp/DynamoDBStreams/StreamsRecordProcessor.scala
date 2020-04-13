@@ -18,6 +18,8 @@ import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import com.goibibo.dp.DynamoDBStreams.Main.{awsRegion, dynamoDBClient, logger}
 
+import scala.util.Try
+
 class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
                              private val topicName: String, producer: KafkaProducer[String, String])
   extends IRecordProcessor {
@@ -31,7 +33,9 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
 
   private val hashKey: String = description.getKeySchema.asScala.filter(x=> x.getKeyType.equals(KeyType.HASH.toString)).head.getAttributeName
 
-  private val sortKey: String = description.getKeySchema.asScala.filter(x=> x.getKeyType.equals(KeyType.RANGE.toString)).head.getAttributeName
+  private val sortKey  = Try{
+    Some(description.getKeySchema.asScala.filter(x=> x.getKeyType.equals(KeyType.RANGE.toString)).head.getAttributeName)
+  }.getOrElse(None)
 
   override def initialize(initializationInput: InitializationInput): Unit = {
     checkpointCounter = 0
@@ -98,7 +102,7 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
   override def processRecords(processRecordsInput: ProcessRecordsInput): Unit = {
     val res = process(processRecordsInput)
     if (!res) {
-      var retryCounter = 10
+      val retryCounter = 10
       breakable {
         1 to retryCounter foreach { count =>
           logger.info(s"Sleeping for 200 milliseconds, for next retry.")
@@ -133,8 +137,13 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
 
   def getItem(keys: java.util.Map[String, AttributeValue])(implicit table:Table) : Item = {
       val hashValue: String = keys.asScala(hashKey).getS
-      val sortValue: String = keys.asScala(sortKey).getS
-      val spec : GetItemSpec = new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey, sortValue)
+      val spec: GetItemSpec = if(sortKey.isDefined) {
+        val sortValue: String = keys.asScala(sortKey.get).getS
+        new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey.get, sortValue)
+      }
+      else {
+        new GetItemSpec().withPrimaryKey(hashKey, hashValue)
+      }
       val dynamoItem : Item = table.getItem(spec)
       dynamoItem
     }
