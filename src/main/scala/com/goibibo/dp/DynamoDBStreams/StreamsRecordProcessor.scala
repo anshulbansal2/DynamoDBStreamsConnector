@@ -138,8 +138,16 @@ class StreamsRecordProcessor(dynamoDBClient2: AmazonDynamoDB, tableName: String,
   def getItem(keys: java.util.Map[String, AttributeValue])(implicit table:Table) : Item = {
       val hashValue: String = keys.asScala(hashKey).getS
       val spec: GetItemSpec = if(sortKey.isDefined) {
-        val sortValue: String = keys.asScala(sortKey.get).getS
-        new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey.get, sortValue)
+        val sortKeyvalue: AttributeValue = keys.asScala(sortKey.get)
+
+          if (sortKeyvalue.getS != null) {
+            val sortValue = sortKeyvalue.getS
+            new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey.get, sortValue)
+          }
+          else {
+            val sortValue = sortKeyvalue.getN
+            new GetItemSpec().withPrimaryKey(hashKey, hashValue, sortKey.get, sortValue.toInt)
+          }
       }
       else {
         new GetItemSpec().withPrimaryKey(hashKey, hashValue)
