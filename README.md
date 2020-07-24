@@ -1,8 +1,13 @@
 # DynamoDBStreams-Connector
 
-DynamoDBStreams connector helps sync dynamodb data to kafka, It uses KCL as the base library. 
+DynamoDBStreams connector helps sync dynamodb data to kafka in json format, It uses KCL as the base library. 
 
-Below command takes:
+Kafka topic key will contain dynamodb primary key in json format: {'hashkeyname': 'hashkeyvalue', 'sortkeyname': 'sortkeyvalue'}
+kafka value will contain compelete row map converted to json. 
+
+Run using below command:
+
+Parameters to be passed: 
 1. DDynamoDBStreams.kafka.brokers: kafka brokers url.
 2. DDynamoDBStreams.streamsARN: pass dynamoDB table streams url which you want to sync.
 3. DDynamoDBStreams.DynamoDBTableName: pass dynamodb table name. 
