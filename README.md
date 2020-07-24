@@ -2,6 +2,24 @@
 
 DynamoDBStreams connector helps sync dynamodb data to kafka, It uses KCL as the base library. 
 
+Below command takes:
+1. DDynamoDBStreams.kafka.brokers: kafka brokers url.
+2. DDynamoDBStreams.streamsARN: pass dynamoDB table streams url which you want to sync.
+3. DDynamoDBStreams.DynamoDBTableName: pass dynamodb table name. 
+
+DynamoDBstreams run command: 
+
+```bash
+java -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC -Djava.awt.headless=true -Xmx3g -Xms1g -DDynamoDBStreams.kafka.write-topic="user_details" \
+-DDynamoDBStreams.kafka.brokers="XXXXXX:9092,XXXXXXXXXXX:9092" \
+-DDynamoDBStreams.streamsARN="arn:aws:dynamodb:ap-south-1:xxxxxxxxxx:table/user_details/stream/2020-04-02T11:58:53.435" \
+-DDynamoDBStreams.DynamoDBTableName="user_details" \
+-DDynamoDBStreams.applicationName="kcl-adapter" \
+-DDynamoDBStreams.workerID="streams-worker-prod" \
+-cp /home/anshul.bansal/DynamoDBStreamsConnector/target/scala-2.11/DynamoDBStreams-Connector-assembly-0.1.jar \
+com.goibibo.dp.DynamoDBStreams.Main > /home/anshul.bansal/logs/Streams_covid_user_details_$(date '+%Y%m%d-%H').logs 2>&1
+```
+
 Supervisor Kafka Setup:
 ```bash
 
@@ -28,22 +46,4 @@ autorestart=true
 stdout_logfile=/home/user/logs/zookeeper/stdout.log
 stderr_logfile=/home/user/logs/zookeeper/stderr.log
 environment = JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.amzn2.0.1.x86_64
-```
-
-Below command takes:
-1. DDynamoDBStreams.kafka.brokers: kafka brokers url.
-2. DDynamoDBStreams.streamsARN: pass dynamoDB table streams url which you want to sync.
-3. DDynamoDBStreams.DynamoDBTableName: pass dynamodb table name. 
-
-DynamoDBstreams run command: 
-
-```bash
-java -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:+CMSClassUnloadingEnabled -XX:+CMSScavengeBeforeRemark -XX:+DisableExplicitGC -Djava.awt.headless=true -Xmx3g -Xms1g -DDynamoDBStreams.kafka.write-topic="user_details" \
--DDynamoDBStreams.kafka.brokers="XXXXXX:9092,XXXXXXXXXXX:9092" \
--DDynamoDBStreams.streamsARN="arn:aws:dynamodb:ap-south-1:xxxxxxxxxx:table/user_details/stream/2020-04-02T11:58:53.435" \
--DDynamoDBStreams.DynamoDBTableName="user_details" \
--DDynamoDBStreams.applicationName="kcl-adapter" \
--DDynamoDBStreams.workerID="streams-worker-prod" \
--cp /home/anshul.bansal/DynamoDBStreamsConnector/target/scala-2.11/DynamoDBStreams-Connector-assembly-0.1.jar \
-com.goibibo.dp.DynamoDBStreams.Main > /home/anshul.bansal/logs/Streams_covid_user_details_$(date '+%Y%m%d-%H').logs 2>&1
 ```
