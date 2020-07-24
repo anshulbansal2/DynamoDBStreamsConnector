@@ -1,5 +1,6 @@
 # DynamoDBStreams-Connector
 
+DynamoDBStreams connector helps sync dynamodb data to kafka, It uses KCL as the base library. 
 
 Supervisor Kafka Setup:
 ```bash
@@ -28,6 +29,11 @@ stdout_logfile=/home/user/logs/zookeeper/stdout.log
 stderr_logfile=/home/user/logs/zookeeper/stderr.log
 environment = JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-1.8.0.242.b08-0.amzn2.0.1.x86_64
 ```
+
+Below command takes:
+1. DDynamoDBStreams.kafka.brokers: kafka brokers url.
+2. DDynamoDBStreams.streamsARN: pass dynamoDB table streams url which you want to sync.
+3. DDynamoDBStreams.DynamoDBTableName: pass dynamodb table name. 
 
 DynamoDBstreams run command: 
 
